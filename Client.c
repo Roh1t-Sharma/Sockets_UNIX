@@ -13,7 +13,7 @@ int main() {
     // Create a unique FIFO for this client
     pid_t pid = getpid();
     sprintf(client_fifo, CLIENT_FIFO_TEMPLATE, pid);
-    mkfifo(client_fifo, S_IFIFO | 0777);
+    mkfifo(client_fifo, S_IFIFO | 0666);
 
     // Connect to the server
     int server_fd = open(server_fifo, O_WRONLY);
@@ -39,15 +39,12 @@ int main() {
             printf("Received character: %c\n", buffer);
         }
 
-        usleep(500000); // Sleep for 0.5 seconds
+        usleep(100000);
     }
 
     printf("Total characters received: %d\n", char_count);
 
     close(client_fd);
-
-    // Cleanup
     unlink(client_fifo);
-
     return 0;
 }

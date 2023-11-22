@@ -14,7 +14,7 @@ void handler(int signum) {
 }
 
 int main() {
-    umask(0);
+    umask(0077);
     mkfifo(FIFO_FILE, S_IFIFO | 0666);
 
     signal(SIGCHLD, handler);
@@ -29,11 +29,9 @@ int main() {
 
         if (child_pid == 0) {
             // Child process
-            close(0); // Close standard input
-
+            close(0);
             int client_write_fd = open(client_fifo, O_WRONLY);
 
-            // Periodically send characters to the client
             struct timeval start, end;
             gettimeofday(&start, NULL);
 
@@ -54,16 +52,18 @@ int main() {
                     setpriority(which, pid, new_priority);
                 }
 
-                usleep(500000); // Sleep for 0.5 seconds
+                usleep(100000); // Sleep for 0.1 seconds
             }
 
             close(client_write_fd);
+            // Delete the server FIFO file
+            unlink(FIFO_FILE);
+
             exit(0);
         } else {
             // Parent process
             close(client_fd);
         }
     }
-
     return 0;
 }
